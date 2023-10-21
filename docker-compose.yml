@@ -1,0 +1,62 @@
+version: "3.5"
+
+volumes:
+        wordpress:
+                name: wordpress
+                driver: local
+                driver_opts:
+                        device: C:\Users\Mehdi\Documents\Travail Basma\Image_classification_verbe_Arabe\inception-42\srcs\wordpress
+                        o: bind
+                        type: none
+        mariadb:
+                name: mariadb
+                driver: local
+                driver_opts:
+                        device: C:\Users\Mehdi\Documents\Travail Basma\Image_classification_verbe_Arabe\inception-42\srcs\mariadb
+                        o: bind
+                        type: none
+
+networks:
+  inception:
+    name: transformers
+
+services:
+  nginx:
+    container_name: nginx
+    build: ./srcs/nginx/.
+    image: nginx:42
+    ports:
+     - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+     - wordpress:/var/www/html
+    networks:
+      - transformers
+    env_file:
+      - .env
+    restart: always
+  wordpress:
+    container_name: wordpress
+    build: ./srcs/wordpress/.
+    image: wordpress:42
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    env_file:
+      - .env
+    networks:
+      - transformers
+    restart: always
+  mariadb:
+    container_name: mariadb
+    build: ./srcs/mariadb/.
+    image: mariadb:42
+    volumes:
+      - mariadb:/var/lib/mysql
+    env_file:
+      - .env
+    networks:
+      - transformers
+    restart: always
